@@ -13,7 +13,7 @@ data class ApplicationPreferences(
     val isHistoryPaused: Boolean = false,
     val includeNetworkWatchHistory: Boolean = true,
     val excludeFolders: List<String> = emptyList(),
-    val mediaViewMode: MediaViewMode = MediaViewMode.FOLDERS,
+    val mediaViewMode: MediaViewMode = MediaViewMode.VIDEOS,
     val mediaLayoutMode: MediaLayoutMode = MediaLayoutMode.LIST,
 
     // Network browser
@@ -23,11 +23,11 @@ data class ApplicationPreferences(
 
     // Fields
     val showDurationField: Boolean = true,
-    val showFolderDurationField: Boolean = true,
+    val showFolderDurationField: Boolean = false,
     val showExtensionField: Boolean = false,
-    val showPathField: Boolean = true,
-    val showResolutionField: Boolean = false,
-    val showSizeField: Boolean = false,
+    val showPathField: Boolean = false,
+    val showResolutionField: Boolean = true,
+    val showSizeField: Boolean = true,
     val showThumbnailField: Boolean = true,
     val showPlayedProgress: Boolean = true,
 
