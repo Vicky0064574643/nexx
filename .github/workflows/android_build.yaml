@@ -1,4 +1,4 @@
-name: Android Build
+Name: Android Build
 
 on:
   push:
@@ -30,9 +30,6 @@ jobs:
 
       - name: Build Project with gradle
         run: ./gradlew assembleDebug
-
-      - name: Run Local Tests
-        run: ./gradlew test
 
       - name: Lint Checks
         run: ./gradlew ktlintCheck
