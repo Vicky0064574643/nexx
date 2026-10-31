@@ -88,14 +88,10 @@ import dev.anilbeesetti.nextplayer.core.ui.components.TopLevelFabState
 import dev.anilbeesetti.nextplayer.core.ui.components.thenIf
 import dev.anilbeesetti.nextplayer.core.ui.components.tvFocusRing
 import dev.anilbeesetti.nextplayer.core.ui.designsystem.NextIcons
-import dev.anilbeesetti.nextplayer.feature.more.navigation.MoreRoute
-import dev.anilbeesetti.nextplayer.feature.network.navigation.NetworkRoute
-import dev.anilbeesetti.nextplayer.feature.playlist.navigation.PlaylistListRoute
 import dev.anilbeesetti.nextplayer.feature.videopicker.navigation.MediaPickerRoute
 
 /**
- * Top-level destinations shown in the bottom bar / nav rail. The first entry is the start (exit)
- * destination — pressing back from any other tab returns here before leaving the app.
+ * Top-level destinations shown in the bottom bar / nav rail. Only MEDIA (Home) remains.
  */
 enum class TopLevelDestination(
     val route: NavKey,
@@ -109,31 +105,11 @@ enum class TopLevelDestination(
         R.string.home,
         TopLevelFabKey.MEDIA,
     ),
-    PLAYLISTS(
-        PlaylistListRoute,
-        NextIcons.Playlist,
-        R.string.playlists,
-        TopLevelFabKey.PLAYLISTS,
-    ),
-    NETWORK(
-        NetworkRoute,
-        NextIcons.Network,
-        R.string.network,
-        TopLevelFabKey.NETWORK,
-    ),
-    MORE(
-        MoreRoute,
-        NextIcons.More,
-        R.string.more,
-        TopLevelFabKey.MORE,
-    ),
 }
 
 @Composable
 fun rememberTopLevelNavState(): TopLevelNavState {
     val destinations = TopLevelDestination.entries
-    // Each tab keeps its own back stack; rememberNavBackStack persists it across config change and
-    // process death.
     val backStacks = destinations.associate { dest ->
         val backStack = rememberNavBackStack(dest.route)
         backStack.ensureRoot(dest.route)
@@ -152,13 +128,6 @@ fun rememberTopLevelNavState(): TopLevelNavState {
     }
 }
 
-/**
- * Holds the per-tab back stacks and the currently selected tab, and flattens them into the single
- * list of entries that [androidx.navigation3.ui.NavDisplay] renders.
- *
- * The start tab's stack is always kept at the base, so a non-start tab is displayed *on top* of it;
- * this makes back navigation from a secondary tab fall through to the start tab.
- */
 @Stable
 class TopLevelNavState(
     val destinations: List<TopLevelDestination>,
@@ -172,24 +141,11 @@ class TopLevelNavState(
 
     val topLevelRoute: NavKey get() = destinations[selectedIndex].route
 
-    /** The back stack of the currently selected tab — navigation targets are added here. */
     val currentStack: NavBackStack<NavKey> get() = backStacks.getValue(key = topLevelRoute)
 
     private val stacksInUse: List<NavKey>
-        get() = if (selectedIndex == 0) {
-            listOf(element = startRoute)
-        } else {
-            listOf(
-                startRoute,
-                topLevelRoute,
-            )
-        }
+        get() = listOf(element = startRoute)
 
-    /**
-     * The [androidx.navigation3.runtime.NavEntry.contentKey]s of the top-level destinations. Used to
-     * decide whether a rendered scene should show the nav bar/rail. `contentKey` defaults to the
-     * route's `toString()`, matching how the entries are created.
-     */
     val topLevelContentKeys: Set<Any> = destinations.flatMap { dest ->
         listOf(
             dest.route,
@@ -266,8 +222,6 @@ internal fun TopLevelNavState.navigationTransition(
             )
     }
 
-    // Quick Back can select the pop spec while the animated scenes still describe the push.
-    // Keep the direction tied to those scenes so the existing slide can reverse smoothly.
     val isPop = initialState.previousEntries.any {
         it.contentKey == targetState.entries.lastOrNull()?.contentKey
     }
