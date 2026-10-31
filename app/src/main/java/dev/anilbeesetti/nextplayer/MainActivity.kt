@@ -1,42 +1,158 @@
-package dev.anilbeesetti.nextplayer
+package dev.anilbeesetti.nextplayer.settings
 
-import android.content.Intent
-import android.content.res.Configuration
-import android.graphics.Color
-import android.os.Bundle
-import androidx.activity.SystemBarStyle
-import androidx.activity.compose.setContent
-import androidx.activity.enableEdgeToEdge
-import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.animation.expandHorizontally
-import androidx.compose.animation.fadeIn
-import androidx.compose.animation.fadeOut
-import androidx.compose.animation.shrinkHorizontally
-import androidx.compose.foundation.focusGroup
-import androidx.compose.foundation.isSystemInDarkTheme
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.PaddingValues
-import androidx.compose.foundation.layout.WindowInsets
-import androidx.compose.foundation.layout.WindowInsetsSides
-import androidx.compose.foundation.layout.calculateStartPadding
-import androidx.compose.foundation.layout.consumeWindowInsets
-import androidx.compose.foundation.layout.displayCutout
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.only
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
+import androidx.compose.material3.FilledTonalIconButton
+import androidx.compose.material3.Icon
+import androidx.compose.material3.ListItemDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Surface
-import androidx.compose.material3.adaptive.currentWindowAdaptiveInfoV2
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.CompositionLocalProvider
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateMapOf
-import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.key
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
-import androidx.compose.runtime.snapshots.SnapshotStateMap
-import androidx.compose.ui.Alignment
-import androidx
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.unit.dp
+import dev.anilbeesetti.nextplayer.core.ui.R
+import dev.anilbeesetti.nextplayer.core.ui.components.ClickablePreferenceItem
+import dev.anilbeesetti.nextplayer.core.ui.components.NextTopAppBar
+import dev.anilbeesetti.nextplayer.core.ui.components.rememberRestorableFocusState
+import dev.anilbeesetti.nextplayer.core.ui.components.restorableFocusGroup
+import dev.anilbeesetti.nextplayer.core.ui.components.restorableFocusItem
+import dev.anilbeesetti.nextplayer.core.ui.components.tvFocusDown
+import dev.anilbeesetti.nextplayer.core.ui.designsystem.NextIcons
+
+data class SettingsOutput(val navigateUp: () -> Unit, val openSetting: (Setting) -> Unit)
+
+private sealed interface SettingsAction {
+    data object NavigateUp : SettingsAction
+    data class OpenSetting(val setting: Setting) : SettingsAction
+}
+
+@Composable
+fun SettingsScreen(output: SettingsOutput) {
+    SettingsScreenContent { action ->
+        when (action) {
+            is SettingsAction.NavigateUp -> output.navigateUp()
+            is SettingsAction.OpenSetting -> output.openSetting(action.setting)
+        }
+    }
+}
+
+@OptIn(
+    ExperimentalMaterial3Api::class,
+    ExperimentalMaterial3ExpressiveApi::class,
+)
+@Composable
+private fun SettingsScreenContent(onAction: (SettingsAction) -> Unit) {
+    val settingRows = remember { SettingRow.entries }
+    val focusState = rememberRestorableFocusState()
+
+    Scaffold(
+        topBar = {
+            NextTopAppBar(
+                title = stringResource(id = R.string.settings),
+                navigationIcon = {
+                    FilledTonalIconButton(
+                        onClick = { onAction(SettingsAction.NavigateUp) },
+                        modifier = Modifier.tvFocusDown(focusState.requester),
+                    ) {
+                        Icon(
+                            imageVector = NextIcons.ArrowBack,
+                            contentDescription = stringResource(id = R.string.navigate_up),
+                        )
+                    }
+                },
+            )
+        },
+        containerColor = MaterialTheme.colorScheme.surfaceContainer,
+    ) { innerPadding ->
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .verticalScroll(state = rememberScrollState())
+                .restorableFocusGroup(state = focusState)
+                .padding(paddingValues = innerPadding)
+                .padding(horizontal = 16.dp)
+                .padding(vertical = 16.dp),
+            verticalArrangement = Arrangement.spacedBy(ListItemDefaults.SegmentedGap),
+        ) {
+            settingRows.forEachIndexed { index, row ->
+                key(row) {
+                    ClickablePreferenceItem(
+                        modifier = Modifier.restorableFocusItem(
+                            state = focusState,
+                            row.name,
+                        ),
+                        title = stringResource(id = row.titleResId),
+                        description = stringResource(id = row.descriptionResId),
+                        icon = row.icon,
+                        onClick = { onAction(SettingsAction.OpenSetting(row.setting)) },
+                        isFirstItem = index == 0,
+                        isLastItem = index == settingRows.lastIndex,
+                    )
+                }
+            }
+        }
+    }
+}
+
+enum class Setting {
+    APPEARANCE,
+    MEDIA_LIBRARY,
+    PLAYER,
+    GESTURES,
+    SUBTITLE,
+    GENERAL,
+}
+
+private enum class SettingRow(
+    val titleResId: Int,
+    val descriptionResId: Int,
+    val icon: ImageVector,
+    val setting: Setting,
+) {
+    APPEARANCE(
+        titleResId = R.string.appearance_name,
+        descriptionResId = R.string.appearance_description,
+        icon = NextIcons.Appearance,
+        setting = Setting.APPEARANCE,
+    ),
+    MEDIA_LIBRARY(
+        titleResId = R.string.media_library,
+        descriptionResId = R.string.media_library_description,
+        icon = NextIcons.Movie,
+        setting = Setting.MEDIA_LIBRARY,
+    ),
+    PLAYER(
+        titleResId = R.string.player_name,
+        descriptionResId = R.string.player_description,
+        icon = NextIcons.Player,
+        setting = Setting.PLAYER,
+    ),
+    GESTURES(
+        titleResId = R.string.gestures_name,
+        descriptionResId = R.string.gestures_description,
+        icon = NextIcons.SwipeHorizontal,
+        setting = Setting.GESTURES,
+    ),
+    SUBTITLE(
+        titleResId = R.string.subtitle,
+        descriptionResId = R.string.subtitle_desc,
+        icon = NextIcons.Subtitle,
+        setting = Setting.SUBTITLE,
+    ),
+    GENERAL(
+        titleResId = R.string.general_name,
+        descriptionResId = R.string.general_description,
+        icon = NextIcons.ExtraSettings,
+        setting = Setting.GENERAL,
+    ),
+}
