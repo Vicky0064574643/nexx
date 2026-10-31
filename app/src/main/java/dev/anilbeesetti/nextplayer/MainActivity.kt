@@ -66,4 +66,10 @@ import dev.anilbeesetti.nextplayer.core.model.ThemeConfig
 import dev.anilbeesetti.nextplayer.core.ui.components.LocalNavigationBottomPadding
 import dev.anilbeesetti.nextplayer.core.ui.components.LocalTopLevelBottomBarVisibleSetter
 import dev.anilbeesetti.nextplayer.core.ui.components.LocalTopLevelFabSetter
-import dev.anilbeesetti.nextplayer.core.ui
+
+class MainActivity : FragmentActivity() {
+
+    override fun onCreate(savedInstanceState: Bundle?) {
+        val splashScreen = installSplashScreen()
+        super.onCreate(savedInstanceState)
+        enableEdge
