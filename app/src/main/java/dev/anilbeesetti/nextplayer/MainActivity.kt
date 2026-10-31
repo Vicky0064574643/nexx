@@ -76,9 +76,7 @@ import dev.anilbeesetti.nextplayer.navigation.TopLevelNavState
 import dev.anilbeesetti.nextplayer.navigation.mediaNavGraph
 import dev.anilbeesetti.nextplayer.navigation.moreNavGraph
 import dev.anilbeesetti.nextplayer.navigation.navigationTransition
-import dev.anilbeesetti.nextplayer.navigation.networkNavGraph
 import dev.anilbeesetti.nextplayer.navigation.openPlaylist
-import dev.anilbeesetti.nextplayer.navigation.playlistNavGraph
 import dev.anilbeesetti.nextplayer.navigation.rememberTopLevelNavState
 import dev.anilbeesetti.nextplayer.navigation.settingsNavGraph
 import org.koin.android.ext.android.inject
@@ -151,30 +149,15 @@ class MainActivity : FragmentActivity() {
                     }
 
                     val mediaStack = navState.backStacks.getValue(TopLevelDestination.MEDIA.route)
-                    val playlistStack = navState.backStacks.getValue(
-                        TopLevelDestination.PLAYLISTS.route,
-                    )
-                    val networkStack = navState.backStacks.getValue(
-                        TopLevelDestination.NETWORK.route,
-                    )
-                    val moreStack = navState.backStacks.getValue(TopLevelDestination.MORE.route)
 
                     val provider = entryProvider {
                         mediaNavGraph(
                             context = this@MainActivity,
                             backStack = mediaStack,
                         )
-                        playlistNavGraph(
-                            context = this@MainActivity,
-                            backStack = playlistStack,
-                        )
-                        networkNavGraph(
-                            context = this@MainActivity,
-                            backStack = networkStack,
-                        )
                         moreNavGraph(
                             context = this@MainActivity,
-                            backStack = moreStack,
+                            backStack = mediaStack,
                         )
                         settingsNavGraph(backStack = navState.currentStack)
                     }
@@ -195,7 +178,6 @@ class MainActivity : FragmentActivity() {
                             railPadding,
                         ) {
                             NavEntryDecorator<NavKey> { entry ->
-                                // Reserve rail space per entry without resizing the animated display.
                                 Box(
                                     Modifier.thenIf(
                                         navState.topLevelContentKeys.contains(entry.contentKey),
@@ -307,8 +289,6 @@ fun NavigationLayout(
                     modifier = Modifier
                         .fillMaxWidth()
                         .thenIf(condition = isTv) {
-                            // The FAB sits outside screen content, whose full-height focus groups
-                            // overlap it. Enter the content explicitly instead of searching the rail.
                             focusRequester(focusRequester = contentFocusRequester)
                                 .focusProperties {
                                     onExit = {
@@ -348,10 +328,6 @@ fun NavigationLayout(
     }
 }
 
-/**
- * Returns `true` if dark theme should be used, as a function of the [state] and the
- * current system context.
- */
 @Composable
 fun shouldUseDarkTheme(state: MainActivityUiState): Boolean = when (state) {
     MainActivityUiState.Loading -> isSystemInDarkTheme()
@@ -369,9 +345,6 @@ fun shouldUseHighContrastDarkTheme(state: MainActivityUiState): Boolean = when (
     is MainActivityUiState.Success -> state.preferences.useHighContrastDarkTheme
 }
 
-/**
- * Returns `true` if the dynamic color is disabled, as a function of the [state].
- */
 @Composable
 fun shouldUseDynamicTheming(state: MainActivityUiState): Boolean = when (state) {
     MainActivityUiState.Loading -> false
