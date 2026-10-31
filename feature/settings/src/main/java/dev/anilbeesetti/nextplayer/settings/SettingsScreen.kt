@@ -109,10 +109,8 @@ enum class Setting {
     MEDIA_LIBRARY,
     PLAYER,
     GESTURES,
-    AUDIO,
     SUBTITLE,
     GENERAL,
-    ABOUT,
 }
 
 private enum class SettingRow(
@@ -123,50 +121,4 @@ private enum class SettingRow(
 ) {
     APPEARANCE(
         titleResId = R.string.appearance_name,
-        descriptionResId = R.string.appearance_description,
-        icon = NextIcons.Appearance,
-        setting = Setting.APPEARANCE,
-    ),
-    MEDIA_LIBRARY(
-        titleResId = R.string.media_library,
-        descriptionResId = R.string.media_library_description,
-        icon = NextIcons.Movie,
-        setting = Setting.MEDIA_LIBRARY,
-    ),
-    PLAYER(
-        titleResId = R.string.player_name,
-        descriptionResId = R.string.player_description,
-        icon = NextIcons.Player,
-        setting = Setting.PLAYER,
-    ),
-    GESTURES(
-        titleResId = R.string.gestures_name,
-        descriptionResId = R.string.gestures_description,
-        icon = NextIcons.SwipeHorizontal,
-        setting = Setting.GESTURES,
-    ),
-    AUDIO(
-        titleResId = R.string.audio,
-        descriptionResId = R.string.audio_desc,
-        icon = NextIcons.Audio,
-        setting = Setting.AUDIO,
-    ),
-    SUBTITLE(
-        titleResId = R.string.subtitle,
-        descriptionResId = R.string.subtitle_desc,
-        icon = NextIcons.Subtitle,
-        setting = Setting.SUBTITLE,
-    ),
-    GENERAL(
-        titleResId = R.string.general_name,
-        descriptionResId = R.string.general_description,
-        icon = NextIcons.ExtraSettings,
-        setting = Setting.GENERAL,
-    ),
-    ABOUT(
-        titleResId = R.string.about_name,
-        descriptionResId = R.string.about_description,
-        icon = NextIcons.Info,
-        setting = Setting.ABOUT,
-    ),
-}
+        descriptionResId = R
